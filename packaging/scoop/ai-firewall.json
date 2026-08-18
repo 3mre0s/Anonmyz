@@ -1,0 +1,24 @@
+{
+    "version": "0.1.0",
+    "description": "Local proxy that strips secrets from AI prompts before they reach any provider",
+    "homepage": "https://github.com/3mre0s/Anonmyz",
+    "license": "Apache-2.0",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/3mre0s/Anonmyz/releases/download/v0.1.0/ai-firewall-windows-amd64.zip",
+            "hash": "REPLACE_WITH_WINDOWS_AMD64_SHA256",
+            "extract_dir": ""
+        }
+    },
+    "bin": "ai-firewall.exe",
+    "checkver": {
+        "github": "https://github.com/3mre0s/Anonmyz"
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/3mre0s/Anonmyz/releases/download/v$version/ai-firewall-windows-amd64.zip"
+            }
+        }
+    }
+}

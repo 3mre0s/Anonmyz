@@ -38,9 +38,9 @@ Restoration is deterministic for an exact, known placeholder within the same req
 
 - Each request gets an isolated in-memory vault. A placeholder from another request cannot restore a value from this request.
 - Repeated occurrences of the same secret in one request reuse the same placeholder, and every exact occurrence is restored.
-- Placeholder collisions must be rejected rather than allowed to overwrite an existing mapping.
+- Random placeholder collisions are rejected instead of overwriting an existing mapping; Anonmyz generates another placeholder. If it cannot reserve storage safely, the request is blocked rather than forwarded partially masked.
 - Unknown placeholders remain unchanged and never resolve to an unrelated value.
-- Streaming implementations must buffer incomplete placeholder prefixes so network chunk boundaries do not break restoration.
+- Streaming responses use a bounded rolling buffer so placeholders split at any byte boundary can be reassembled before restoration.
 
 There is an important limit: the model must return the placeholder exactly. If it edits, translates, truncates, or omits the placeholder, Anonmyz cannot infer the intended original and does not guess.
 
@@ -54,7 +54,7 @@ Treat Anonmyz as a guardrail against common accidental disclosure, not as proof 
 
 ### What formats are in scope?
 
-The initial detector scope is:
+The current registry contains 28 pattern detectors:
 
 - API keys and tokens: Anthropic, OpenAI, Google, GitHub PAT/OAuth/Actions tokens, GitLab PAT, AWS access-key IDs and secret-access keys, Stripe, Slack, JWTs, HTTP Bearer tokens, and PEM private-key blocks.
 - Contextual credentials: common inline assignments such as `password=...` or `api_key: ...`, plus shell `export`/`set` assignments.
@@ -71,12 +71,43 @@ This list is the scope, not a claim of universal secret detection.
 - Required provider authentication headers are not masked.
 - Traffic that bypasses the configured proxy is not protected.
 - Restoration only applies to exact placeholders known to the current request.
-- The local vault must be wiped when the request/response exchange completes.
+- The request-scoped local vault is wiped when the request/response exchange completes.
 - An inability to mask safely must block the request rather than forward a partially sanitized body.
 
-## Status
+## Run the local proof
 
-This repository is the new home for Anonmyz. Source, tests, runnable examples, release artifacts, and the complete threat model will be published here separately from the original hackathon repository.
+Prerequisite: Go 1.22 or later. The demo uses loopback networking only and does not require an API key.
+
+```bash
+go build -trimpath -o anonmyz .
+./anonmyz demo --non-interactive
+```
+
+Windows PowerShell:
+
+```powershell
+go build -trimpath -o anonmyz.exe .
+.\anonmyz.exe demo --non-interactive
+```
+
+The demo starts the production proxy and a local mock model, proves the original fake values are absent upstream, verifies that placeholders are present, splits a placeholder across SSE writes, and confirms local restoration. It exits non-zero when an invariant fails.
+
+## Source map
+
+- [`patterns/`](patterns/) — supported pattern registry and validators
+- [`masker/`](masker/) — masking and exact placeholder restoration
+- [`vault/`](vault/) — request-scoped in-memory mappings
+- [`proxy/`](proxy/) — explicit HTTP proxy and streaming response path
+- [`mitm/`](mitm/) — optional transparent proxy mode
+- [`THREAT_MODEL.md`](THREAT_MODEL.md) — security boundaries and non-goals
+
+## Verify
+
+```bash
+go test ./...
+go test -race ./...
+go vet ./...
+```
 
 ## License
 

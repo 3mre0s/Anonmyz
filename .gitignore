@@ -1,0 +1,49 @@
+# ── Binaries ──────────────────────────────────────────────────────────────────
+ai-firewall
+ai-firewall.exe
+ai-firewall-*
+anonmyz
+anonmyz.exe
+anonmyz-*
+*.exe
+dist/
+.release-dist/
+
+# ── MITM CA key / cert (never commit private key material) ───────────────────
+ca.key
+ca.crt
+.ai-firewall/
+
+# ── Environment / secrets ─────────────────────────────────────────────────────
+.env
+*.local.env
+
+# ── Go ────────────────────────────────────────────────────────────────────────
+*.test
+*.out
+vendor/
+.gocache/
+coverage.*
+
+# ── Node.js ───────────────────────────────────────────────────────────────────
+node_modules/
+*.vsix
+
+# ── IDE / OS ──────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+.aider*
+
+# Local review, export, and submission-rendering artifacts
+*.diff
+*.backup.*
+/Only-Codes/
+/release-clean/
+/submission/video-out/
+/implementation_plan.md
+/local_security*.txt
+/Microsoft.Services.Store.winmd
+/tatus --short
